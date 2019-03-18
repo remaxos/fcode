@@ -24,9 +24,9 @@ void draw_project(cairo_t *cr, fcode_project *p)
     cairo_show_text(cr, "test");
 }
 
-#define BORDER 10
-#define MIN_DX 100
-#define MIN_DY 20
+#define BORDER 20
+#define MIN_DX 200
+#define MIN_DY 50
 
 
 void set_sx(fcode_object *obj) {
@@ -101,7 +101,7 @@ void set_sy(fcode_object *obj, int sy) {
     int cnt = 0;
     while(tmp) {
 	set_sy((fcode_object *)tmp->value, child_sy);
-	child_sy += get_dy((fcode_object *)tmp->value);
+	child_sy += get_dy((fcode_object *)tmp->value) + BORDER;
 
 	tmp = tmp->next;
     }
