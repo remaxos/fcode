@@ -17,7 +17,8 @@ void fcode_parse_dir(char *location, fcode_object *parent)
         while ((dir = readdir(d)) != NULL) {
             printf("%s %d -> %d\n", dir->d_name, dir->d_type, strcmp(dir->d_name, ".."));
 
-	    if (strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0) {
+	    /* TODO: a sort of a dirignore (similar to gitignore) should be created */
+	    if (strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0 && strcmp(dir->d_name, ".git") != 0) {
 		fcode_object *fobj = (fcode_object *)malloc(sizeof(fcode_object));
 		/* TODO: fobj == NULL */
 		
