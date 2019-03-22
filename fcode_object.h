@@ -23,6 +23,7 @@ typedef struct object {
     int sy;
     int dx;
     int dy;
+    int exp; /* horizontal/vertical expansion */
 
 } fcode_object;
 
