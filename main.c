@@ -51,7 +51,7 @@ gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data)
     width = gtk_widget_get_allocated_width(widget);
     height = gtk_widget_get_allocated_height(widget);
 
-    printf("%d %d\n", width, height);
+    //printf("%d %d\n", width, height);
 
     gtk_render_background(context, cr, 0, 0, width, height);
     draw_project(cr, p);
@@ -105,6 +105,24 @@ static void callback(GtkWidget *widget, gpointer data)
     gtk_widget_destroy (dialog);
 }
 
+
+gboolean button_press_event(GtkWidget *widget, GdkEventKey *event, gpointer udata)
+{
+    switch (event->keyval)
+    {
+        case GDK_KEY_minus:
+	    printf("zoom-out\n");
+	    fflush(stdout);
+	    break;
+	case GDK_KEY_plus:
+	    printf("zoom-in\n");
+	    fflush(stdout);
+	    break;
+    };
+
+    return FALSE;
+} 
+
 int main(int argc, char **argv)
 {
     if (argc == 2) {
@@ -127,10 +145,12 @@ int main(int argc, char **argv)
     
     print_project(&p);
 
-    fcode_gen_xml(&p);
-#if 0
+    /* generate draw.io xml diagram */
+    //fcode_gen_xml(&p);
+
     /* GtkWidget is the storage type for widgets */
-    GtkWidget *window;
+    GtkWidget *main_window;
+    GtkWidget *scroll_window;
     GtkWidget *button;
     GtkWidget *drawing_area;
     GtkWidget *box;
@@ -138,27 +158,33 @@ int main(int argc, char **argv)
     gtk_init(&argc, &argv);
 
     /* Create a new window */
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-    /* TODO */
-    drawing_area = gtk_drawing_area_new();
-    gtk_widget_set_size_request(drawing_area, 200, 200);
-    g_signal_connect(G_OBJECT(drawing_area), "draw", G_CALLBACK(draw_callback), (gpointer)&p); 
-
-    gtk_window_set_title(GTK_WINDOW (window), "FCode");
-
+    main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(main_window), "FCode");
     /* It's a good idea to do this for all windows. */
-    g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
-    g_signal_connect (window, "delete-event", G_CALLBACK(gtk_main_quit), NULL);
-
+    g_signal_connect(main_window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
+    g_signal_connect(main_window, "delete-event", G_CALLBACK(gtk_main_quit), NULL);
     /* Sets the border width of the window. */
-    gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+    gtk_container_set_border_width(GTK_CONTAINER(main_window), 5);
+    //gtk_window_fullscreen(GTK_WINDOW(main_window)); 
+
+    /* Creating the 2D playing ground */
+    drawing_area = gtk_drawing_area_new();
+    /* TODO: this looks shitty, maybe rewrite it */
+    gtk_widget_set_size_request(drawing_area, p.objects->dx, p.objects->dy);
+    g_signal_connect(G_OBJECT(drawing_area), "draw", G_CALLBACK(draw_callback), (gpointer)&p); 
+    g_signal_connect(G_OBJECT(main_window), "key_press_event", G_CALLBACK(button_press_event),
+		    (gpointer)&p);
+
+    /* scrolled window */
+    scroll_window = gtk_scrolled_window_new(NULL, NULL);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll_window), GTK_POLICY_AUTOMATIC,
+		    GTK_POLICY_ALWAYS);
 
     /* Create a new button */
     button = gtk_button_new();
 
     /* Connect the "clicked" signal of the button to our callback */
-    g_signal_connect(button, "clicked", G_CALLBACK(callback), (gpointer) window);
+    g_signal_connect(button, "clicked", G_CALLBACK(callback), (gpointer)main_window);
 
     /* This calls our box creating function */
     box = xpm_label_box("info.xpm", "Open directory");
@@ -169,14 +195,16 @@ int main(int argc, char **argv)
     //gtk_container_add(GTK_CONTAINER(button), box);
 
     //gtk_widget_show(button);
-    gtk_widget_show(drawing_area);
     //gtk_container_add(GTK_CONTAINER(window), button);
-    gtk_container_add(GTK_CONTAINER(window), drawing_area);
+    gtk_container_add(GTK_CONTAINER(main_window), scroll_window);
+    gtk_container_add(GTK_CONTAINER(scroll_window), drawing_area);
 
-    gtk_widget_show(window);
+    gtk_widget_show(drawing_area);
+    gtk_widget_show(scroll_window);
+    gtk_widget_show(main_window);
 
     /* Rest in gtk_main and wait for the fun to begin! */
     gtk_main();
-#endif
+
     return 0;
 }
