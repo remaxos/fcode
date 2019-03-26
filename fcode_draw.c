@@ -2,13 +2,29 @@
 
 #include "fcode_object.h"
 
+void fcode_gtk_draw_object(cairo_t *cr, fcode_object *obj)
+{
+    cairo_rectangle(cr, obj->sx, obj->sy, obj->dx, obj->dy);
+    cairo_set_source_rgb(cr, 10, 0, 0); 
+    cairo_stroke(cr);
+    //cairo_fill(cr);
+
+    node *tmp = obj->children;
+    while(tmp) {
+	fcode_gtk_draw_object(cr, (fcode_object *)tmp->value);
+	tmp = tmp->next;
+    }
+}
 
 void draw_project(cairo_t *cr, fcode_project *p)
 {
     GdkRGBA color;
     cairo_set_source_rgb(cr, 10, 10, 10); 
 
-    cairo_rectangle(cr, 0, 0, 70, 70);
+    //cairo_rectangle(cr, 0, 0, 70, 70);
+    fcode_gtk_draw_object(cr, p->objects); 
+
+    /* 
     cairo_select_font_face(cr, "Purisa", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
 
     cairo_set_font_size(cr, 100);
@@ -22,6 +38,7 @@ void draw_project(cairo_t *cr, fcode_project *p)
     gdk_cairo_set_source_rgba (cr, &color);
     cairo_move_to(cr, 20, 100);
     cairo_show_text(cr, "test");
+    */
 }
 
 #define BORDER 20
