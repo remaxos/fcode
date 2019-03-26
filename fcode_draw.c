@@ -5,8 +5,14 @@
 void fcode_gtk_draw_object(cairo_t *cr, fcode_object *obj)
 {
     cairo_rectangle(cr, obj->sx, obj->sy, obj->dx, obj->dy);
-    cairo_set_source_rgb(cr, 10, 0, 0); 
+    cairo_set_source_rgb(cr, 0, 0, 0); /* black */
     cairo_stroke(cr);
+
+    cairo_select_font_face(cr, "UbuntuMono", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cr, 10);
+    cairo_move_to(cr, obj->sx, obj->sy + 10);
+    cairo_show_text(cr, obj->name);
+
     //cairo_fill(cr);
 
     node *tmp = obj->children;
