@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "fcode_parser.h"
+#include "fcode_draw.h"
 
 
 /* Create a new hbox with an image and a label packed into it
@@ -52,10 +53,8 @@ gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data)
     printf("%d %d\n", width, height);
 
     gtk_render_background(context, cr, 0, 0, width, height);
-    //draw_project(cr, p);
+    draw_project(cr, p);
 
-
-    cairo_fill(cr);
     //cairo_rectangle(cr, 10, 10, 100, 100);
 
 /* 
@@ -119,7 +118,9 @@ int main(int argc, char **argv)
     strcpy(p.objects->name, "root");
     p.objects->sx = p.objects->sy = p.objects->dx = p.objects->dy = 0;
     p.objects->children = NULL;
+
     fcode_parse_dir(argv[1], p.objects);
+
     printf("initialize drawings...\n");
     prepare_drawing(&p);
     
@@ -176,6 +177,5 @@ int main(int argc, char **argv)
     /* Rest in gtk_main and wait for the fun to begin! */
     gtk_main();
 #endif
-
     return 0;
 }
