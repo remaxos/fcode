@@ -4,6 +4,7 @@
 
 #include "fcode_parser.h"
 #include "fcode_draw.h"
+#include "fcode_xml.h"
 
 
 /* Create a new hbox with an image and a label packed into it
