@@ -1,3 +1,6 @@
+#include <stdbool.h>
+#include <gtk/gtk.h>
+
 #include "fcode_list.h"
 
 #ifndef FCODE_OBJECT_H
@@ -19,18 +22,22 @@ typedef struct object {
     node *children; 
 
     /* drawing */
-    int sx;
-    int sy;
-    int dx;
-    int dy;
-    int exp; /* horizontal/vertical expansion */
+    float sx;
+    float sy;
+    float dx;
+    float dy;
 
+    bool exp; /* horizontal/vertical expansion */
 } fcode_object;
-
-
 
 typedef struct project {
     fcode_object *objects; 
+
+    /* zoom-in/zoom-out feature */
+    float scale;
+
+    /* needed for redrawing inside a click */
+    GtkWidget *drawing_area;
 } fcode_project;
 
 void print_object(fcode_object *obj);

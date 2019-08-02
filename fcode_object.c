@@ -9,7 +9,7 @@ void fcode_objprint(void *elem) {
 }
 
 void print_object(fcode_object *obj) {
-    printf("%d %s (%d, %d, %d, %d)\n", obj->type, obj->name,
+    printf("%d %s (%f, %f, %f, %f)\n", obj->type, obj->name,
 	  obj->sx, obj->sy, obj->dx, obj->dy); 
     list_print(obj->children, fcode_objprint);
 }

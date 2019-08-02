@@ -105,10 +105,10 @@ void fcode_xml_node(xmlNodePtr node, fcode_object *obj, int id)
     char sid[10] = {0};
     struct node *tmp;
 
-    sprintf(start_x, "%d", obj->sx);
-    sprintf(start_y, "%d", obj->sy);
-    sprintf(diff_x, "%d", obj->dx);
-    sprintf(diff_y, "%d", obj->dy);
+    sprintf(start_x, "%f", obj->sx);
+    sprintf(start_y, "%f", obj->sy);
+    sprintf(diff_x, "%f", obj->dx);
+    sprintf(diff_y, "%f", obj->dy);
 
     time_t t;
     sprintf(sid, "%ld", random());

@@ -6,7 +6,6 @@
 #include "fcode_draw.h"
 #include "fcode_xml.h"
 
-
 /* Create a new hbox with an image and a label packed into it
  * and return the box. */
 
@@ -43,8 +42,7 @@ gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data)
     guint width, height;
     GtkStyleContext *context;
 
-    fcode_project *p = (fcode_project *)data;
-
+    fcode_project *proj = (fcode_project *)data;
 
     context = gtk_widget_get_style_context(widget);
 
@@ -54,7 +52,8 @@ gboolean draw_callback(GtkWidget *widget, cairo_t *cr, gpointer data)
     //printf("%d %d\n", width, height);
 
     gtk_render_background(context, cr, 0, 0, width, height);
-    draw_project(cr, p);
+    cairo_scale(cr, proj->scale, proj->scale);
+    draw_project(cr, proj);
 
     //cairo_rectangle(cr, 10, 10, 100, 100);
 
@@ -106,17 +105,29 @@ static void callback(GtkWidget *widget, gpointer data)
 }
 
 
-gboolean button_press_event(GtkWidget *widget, GdkEventKey *event, gpointer udata)
+gboolean button_press_event(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
+    fcode_project *proj = (fcode_project *)data;
+
     switch (event->keyval)
     {
         case GDK_KEY_minus:
 	    printf("zoom-out\n");
 	    fflush(stdout);
+
+	    proj->scale -= 0.1;
+	    prepare_drawing(proj);
+	    gtk_widget_queue_draw(proj->drawing_area);
+
 	    break;
 	case GDK_KEY_plus:
 	    printf("zoom-in\n");
 	    fflush(stdout);
+
+            proj->scale += 0.1;	
+	    prepare_drawing(proj);
+	    gtk_widget_queue_draw(proj->drawing_area);
+
 	    break;
     };
 
@@ -125,28 +136,30 @@ gboolean button_press_event(GtkWidget *widget, GdkEventKey *event, gpointer udat
 
 int main(int argc, char **argv)
 {
+    fcode_project proj;
+
     if (argc == 2) {
 	printf("%s %s\n", argv[0], argv[1]);
     }
 
     /* parse the location and construct the structure */
     printf("parsing project...\n");
-    fcode_project p;
-    p.objects = malloc(sizeof(fcode_object));
-    p.objects->type = FCODE_ROOT;
-    strcpy(p.objects->name, "root");
-    p.objects->sx = p.objects->sy = p.objects->dx = p.objects->dy = 0;
-    p.objects->children = NULL;
+    proj.objects = malloc(sizeof(fcode_object));
+    proj.objects->type = FCODE_ROOT;
+    strcpy(proj.objects->name, "root");
+    proj.objects->sx = proj.objects->sy = proj.objects->dx = proj.objects->dy = 0;
+    proj.objects->children = NULL;
+    proj.scale = 1;
 
-    fcode_parse_dir(argv[1], p.objects);
+    fcode_parse_dir(argv[1], proj.objects);
 
     printf("initialize drawings...\n");
-    prepare_drawing(&p);
+    prepare_drawing(&proj);
     
-    print_project(&p);
+    print_project(&proj);
 
     /* generate draw.io xml diagram */
-    //fcode_gen_xml(&p);
+    fcode_gen_xml(&proj);
 
     /* GtkWidget is the storage type for widgets */
     GtkWidget *main_window;
@@ -169,11 +182,13 @@ int main(int argc, char **argv)
 
     /* Creating the 2D playing ground */
     drawing_area = gtk_drawing_area_new();
+    proj.drawing_area = drawing_area;
+
     /* TODO: this looks shitty, maybe rewrite it */
-    gtk_widget_set_size_request(drawing_area, p.objects->dx, p.objects->dy);
-    g_signal_connect(G_OBJECT(drawing_area), "draw", G_CALLBACK(draw_callback), (gpointer)&p); 
+    gtk_widget_set_size_request(drawing_area, proj.objects->dx, proj.objects->dy);
+    g_signal_connect(G_OBJECT(drawing_area), "draw", G_CALLBACK(draw_callback), (gpointer)&proj); 
     g_signal_connect(G_OBJECT(main_window), "key_press_event", G_CALLBACK(button_press_event),
-		    (gpointer)&p);
+		    (gpointer)&proj);
 
     /* scrolled window */
     scroll_window = gtk_scrolled_window_new(NULL, NULL);

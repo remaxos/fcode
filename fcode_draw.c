@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <stdbool.h>
 
 #include "fcode_object.h"
 
@@ -55,17 +56,19 @@ void draw_project(cairo_t *cr, fcode_project *p)
 #define MIN_DX 200
 #define MIN_DY 50
 
+
+/* TODO: make two structures, one for bottom-up, another for top-down */
 typedef struct fcode_objdraw {
     /* father tells children at what (sx, sy) they should start */
-    int sx;
-    int sy;
+    float sx;
+    float sy;
 
     /* child should tell his father his sizes */
-    int dx;
-    int dy;
+    float dx;
+    float dy;
 
     /* horizontal or vertical expansion told by father */
-    int exp;
+    bool exp;
 } fcode_objdraw;
 
 
@@ -87,7 +90,7 @@ fcode_objdraw *draw_object(fcode_object *obj, fcode_objdraw *down_obj) {
     fcode_objdraw *up_obj;
     int tmp_sx, tmp_sy;
 
-    printf("%s down:%d %d %d %d\n", obj->name , down_obj->sx, down_obj->sy, down_obj->dx, down_obj->dy);
+    printf("%s down:%f %f %f %f\n", obj->name , down_obj->sx, down_obj->sy, down_obj->dx, down_obj->dy);
 
     /* use the pass down parameters */
     obj->sx = down_obj->sx;
@@ -130,11 +133,15 @@ fcode_objdraw *draw_object(fcode_object *obj, fcode_objdraw *down_obj) {
 	if (obj->exp == 1) {
 	    obj->dy += up_obj->dy + BORDER;
 	    down_obj->sy += up_obj->sy + BORDER;
+
+	    /* TODO: remember what is this for */
 	    if (up_obj->dx + 2 * BORDER > obj->dx)
 		obj->dx = up_obj->dx + 2 * BORDER;
 	} else {
 	    obj->dx += up_obj->dx + BORDER;
 	    down_obj->sx += up_obj->sx + BORDER;
+
+	    /* TODO: remember what is this for */
 	    if (up_obj->dy + 2 * BORDER > obj->dy)
 		obj->dy = up_obj->dy + 2 * BORDER;
 	}
